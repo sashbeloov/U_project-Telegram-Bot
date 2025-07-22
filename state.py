@@ -1,0 +1,31 @@
+from aiogram.fsm.state import State, StatesGroup
+
+
+class statuslar(StatesGroup):
+    language = State()
+    customer_or_master = State()
+    master_name = State()
+    master_phone = State()
+    ustaxona_nomi = State()
+    moljal = State()
+    location = State()
+    working_time = State()
+    min_and_confirmation = State()
+    confirmation_or_rejected = State()
+    registered_master_menu = State()
+    jarayonda_menu = State()
+    contact_with_admin_message = State()
+    rating = State()
+    select_change_info = State()
+    update_value = State()
+    sana = State()
+    mijoza_contact = State()
+    customer_name = State()
+    check_conf_customer = State()
+    customer_menu_checked = State()
+    change_info_check = State()
+    update_name_or_phone_or_language = State()
+    update_name = State()
+    update_phone_customer = State()
+    update_customer_lang = State()
+
