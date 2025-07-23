@@ -159,5 +159,37 @@ def change_lang(lang):
 
 
 
+def service_type_user(lang):
+    keyboard = ReplyKeyboardBuilder()
+    keyboard.add(KeyboardButton(text=get_text(lang, 'buttons', 'barber')), KeyboardButton(text=get_text(lang, 'buttons', 'beauty_salon')),
+                 KeyboardButton(text=get_text(lang, 'buttons', 'shoes_master')),KeyboardButton(text=get_text(lang, 'buttons', 'watch_master')),
+                 KeyboardButton(text=get_text(lang, 'buttons', 'back')))
+    keyboard.adjust(2)
+    return keyboard.as_markup(resize_keyboard=True)
 
 
+
+def selected_service_type_user(lang):
+    keyboard = ReplyKeyboardBuilder()
+    keyboard.add(KeyboardButton(text=get_text(lang, 'buttons', 'ism')), KeyboardButton(text=get_text(lang, 'buttons', 'rating_masters')),
+                 KeyboardButton(text=get_text(lang, 'buttons', 'lok')), KeyboardButton(text=get_text(lang, 'buttons', 'back')))
+    keyboard.adjust(2,1)
+    return keyboard.as_markup(resize_keyboard=True)
+
+
+
+
+def all_master_names(all_master_names):
+    keyboard = ReplyKeyboardBuilder()
+    for i in all_master_names:
+        keyboard.row(KeyboardButton(text=str(i)))
+    keyboard.adjust(3)
+    return keyboard.as_markup(resize_keyboard=True)
+
+
+def get_master_name_and_rating_by_id(get_master_name_and_rating_by_id):
+    keyboard = ReplyKeyboardBuilder()
+    for i in get_master_name_and_rating_by_id:
+        keyboard.row(KeyboardButton(text=str(i)))
+    keyboard.adjust(3)
+    return keyboard.as_markup(resize_keyboard=True)
