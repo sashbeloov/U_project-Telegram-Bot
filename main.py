@@ -32,6 +32,7 @@ lang_from_db = {"eng":"🇺🇸 eng","uz":"🇺🇿 uz","ru":"🇷🇺 ru"}
 create_table()
 create_bookings_table()
 create_table_users()
+create_appointments_table()
 
 
 @router.message(F.text.startswith("/start"))
@@ -79,13 +80,32 @@ async def customer_or_master_register(message: Message, state: FSMContext):
     data = await state.get_data()
     lang = data['language']
     if message.text == get_text(lang, "buttons", "master"):
-        await bot.send_message(chat_id=user_id,text=get_text(lang, 'message_text', 'name'), reply_markup=ReplyKeyboardRemove())
-        await state.set_state(statuslar.master_name)
+        await bot.send_message(chat_id=user_id,text=get_text(lang, 'message_text', 'service_type_user'), reply_markup=kb.service_type_user(lang))
+        await state.set_state(statuslar.service_type_user_master)
+
     if message.text == get_text(lang, "buttons", "customer"):
         await message.answer(text=get_text(lang, 'message_text', 'contact'), reply_markup=kb.phone_key(lang))
         await state.set_state(statuslar.mijoza_contact)
 
 
+
+
+
+@router.message(statuslar.service_type_user_master)
+async def service_type_user_master(message: Message, state: FSMContext):
+    user_id = message.from_user.id
+    data = await state.get_data()
+    lang = data['language']
+    service_buttons = [
+        "barber", "beauty_salon", "shoes_master", "watch_master"]
+
+    if any(message.text == get_text(lang, "buttons", btn) for btn in service_buttons):
+        await state.update_data(service_type=message.text)
+        await message.answer(text=get_text(lang, 'message_text', 'name'),
+                             reply_markup=ReplyKeyboardRemove())
+        await state.set_state(statuslar.master_name)
+    else:
+        await message.answer(get_text(lang, "message_text", "not_found"))
 
 
 
@@ -173,26 +193,75 @@ async def customer_menu_checked(message: Message, state: FSMContext):
             await state.set_state(statuslar.change_info_check)
 
         elif message.text == get_text(lang, "buttons", "service_type"):
-            await state.set_state(statuslar.tanlanga_hizmatlar)
+            if get_user_appointments(user_id):
+                await message.answer(text=get_text(lang, 'message_text', 'select_change_info'), reply_markup=kb.menu(lang))
+            else:
+                await message.answer(text=get_text(lang, 'message_text', 'no_booking'),reply_markup=kb.menu(lang))
 
-
-        elif message.text == get_text(lang, "buttons", ""):
-            pass
+        elif message.text == get_text(lang, "buttons", "services"):
+            await message.answer(text=get_text(lang, 'message_text', 'service_type_user'),reply_markup=kb.service_type_user(lang))
+            await state.set_state(statuslar.service_type_user)
     except Exception as e:
         print(f"Error:{e}")
 
 
+bron_to_master = {}
+@router.message(statuslar.service_type_user)
+async def service_type_user(message: Message, state: FSMContext):
+    try:
+        user_id = message.from_user.id
+        data = await state.get_data()
+        lang = data['language']
+
+        if message.text == get_text(lang, "buttons", "back"):
+            await message.answer(text=get_text(lang, 'message_text', 'menu'),reply_markup=kb.menu(lang))
+            await state.set_state(statuslar.customer_menu_checked)
+
+        service_buttons = [
+            "barber", "beauty_salon", "shoes_master", "watch_master"]
+
+        if any(message.text == get_text(lang, "buttons", btn) for btn in service_buttons):
+            await state.update_data(services_type_user=message.text)
+
+            await message.answer(text=get_text(lang, 'message_text', 'how_to_find_master'),reply_markup=kb.selected_service_type_user(lang))
+            await state.set_state(statuslar.how_to_find)
+        else:
+            await message.answer(get_text(lang, "message_text", "not_found"))
+
+    except Exception as e:
+        print(f"Error: {e}")
 
 
 
+@router.message(statuslar.how_to_find)
+async def selected_service_type_user(message: Message, state: FSMContext):
+    try:
+        user_id = message.from_user.id
+        data = await state.get_data()
+        lang = data['language']
+        if message.text == get_text(lang, "buttons", "back"):
+            await message.answer(text=get_text(lang, 'message_text', 'service_type_user'),reply_markup=kb.service_type_user(lang))
+            await state.set_state(statuslar.service_type_user)
 
+        if message.text == get_text(lang, "buttons", "ism"):
+            services_type_user = data['services_type_user']
+            if get_masters_names_by_service_type(services_type_user):
+                all_master_names = get_masters_names_by_service_type(services_type_user)
+                await message.answer(text=get_text(lang, 'message_text', 'choose_master_by_name'),reply_markup=kb.all_master_names(all_master_names))
+                await state.set_state(statuslar.all_master_names)
+            else:
+                await message.answer(text=get_text(lang, 'message_text', 'no_masters'), reply_markup=kb.service_type_user(lang))
 
+        if message.text == get_text(lang, "buttons", "rating_masters"):
 
+            await message.answer(text=get_text(lang, 'message_text', ''),reply_markup=kb.get_master_name_and_rating_by_id(get_master_name_and_rating_by_id(user_id)))
+            await state.set_state(statuslar.get_master_name_and_rating_by_id)
+        # if message.text == get_text(lang, "buttons", "lok"):
+        #     await message.answer(text=get_text(lang, 'message_text', ''),reply_markup=kb.(lang))
+        #     await state.set_state(statuslar.)
 
-
-
-
-
+    except Exception as e:
+            print(f"Error:{e}")
 
 
 
@@ -486,7 +555,7 @@ async def confirmation_or_rejected(message: Message, state: FSMContext):
     lang = lang_from_db[lang]
     if message.text == get_text(lang, "buttons", "confirm"):
         await message.answer(text=get_text(lang, 'message_text', 'check_admin_message'),reply_markup=kb.waited_confirmation(lang))
-        insert_master(user_id, data['name'], data['phone'], data['ustaxona_nomi'], data['moljal'], data['address'], data['hours'], data['min'], save_lang[lang])
+        insert_master(user_id, data['name'], data['phone'], data['ustaxona_nomi'], data['moljal'], data['address'], data['hours'], data['min'], save_lang[lang],data['service_type'])
 
         msg_text = (
             f"{get_text(lang, 'message_text', 'new_user_register')}\n"
