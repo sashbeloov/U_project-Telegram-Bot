@@ -28,4 +28,5 @@ class statuslar(StatesGroup):
     update_name = State()
     update_phone_customer = State()
     update_customer_lang = State()
+    tanlanga_hizmatlar = State()
 
