@@ -115,7 +115,9 @@ def create_table():
             hours VARCHAR(50),
             min VARCHAR(50),
             language VARCHAR(10),
+            service_type VARCHAR(50),
             status BOOLEAN DEFAULT FALSE,
+            rating NUMERIC(2,1) DEFAULT 0,
             created_at TIMESTAMP DEFAULT NOW()
         );
         """)
@@ -128,13 +130,13 @@ def create_table():
 
 
 
-def insert_master(user_id, name, phone, ustaxona_nomi, moljal, address, hours, min_time, language):
+def insert_master(user_id, name, phone, ustaxona_nomi, moljal, address, hours, min_time, language, service_type, rating=0.0):
     try:
         conn = connect_db()
         cur = conn.cursor()
         query = """
-        INSERT INTO masters (user_id, name, phone, ustaxona_nomi, moljal, address, hours, min, language, status)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, FALSE)
+        INSERT INTO masters (user_id, name, phone, ustaxona_nomi, moljal, address, hours, min, language, service_type, rating, status)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, FALSE)
         ON CONFLICT (user_id) DO UPDATE SET
             name = EXCLUDED.name,
             phone = EXCLUDED.phone,
@@ -144,15 +146,62 @@ def insert_master(user_id, name, phone, ustaxona_nomi, moljal, address, hours, m
             hours = EXCLUDED.hours,
             min = EXCLUDED.min,
             language = EXCLUDED.language,
+            service_type = EXCLUDED.service_type,
+            rating = EXCLUDED.rating,
             status = FALSE;
         """
-        cur.execute(query, (user_id, name, phone, ustaxona_nomi, moljal, address, hours, min_time, language))
+        cur.execute(query, (user_id, name, phone, ustaxona_nomi, moljal, address, hours, min_time, language, service_type, rating))
         conn.commit()
         cur.close()
         conn.close()
     except Exception as e:
         print(f"DB insert error: {e}")
 
+
+
+def get_master_name_and_rating_by_id(user_id):
+    try:
+        conn = connect_db()
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT name, rating FROM masters
+            WHERE user_id = %s;
+        """, (user_id,))
+        row = cur.fetchone()
+        cur.close()
+        conn.close()
+
+        if row:
+            name, rating = row
+            return f"{name} {rating}/10"
+        else:
+            return None
+    except Exception as e:
+        print(f"Error: {e}")
+        return None
+
+
+
+
+def get_masters_names_by_service_type(service_type):
+    try:
+        conn = connect_db()
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT name FROM masters
+            WHERE service_type = %s
+            ORDER BY name;
+        """, (service_type,))
+        rows = cur.fetchall()
+        cur.close()
+        conn.close()
+
+        # Faqat ismlar ro'yxatini qaytaramiz
+        return [row[0] for row in rows] if rows else []
+
+    except Exception as e:
+        print(f"Error: {e}")
+        return []
 
 
 def update_master_info(user_id, **kwargs):
@@ -358,6 +407,73 @@ def get_all_customer_bookings(master_id):
     except Exception as e:
         print(f"Xato: {e}")
         return False
+
+
+
+def create_appointments_table():
+    try:
+        conn = connect_db()
+        cur = conn.cursor()
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS appointments (
+                id SERIAL PRIMARY KEY,
+                user_id BIGINT NOT NULL,
+                user_name VARCHAR(100),
+                master_id INT NOT NULL,
+                service_name VARCHAR(100),
+                date DATE NOT NULL,
+                time TIME NOT NULL,
+                created_at TIMESTAMP DEFAULT NOW(),
+                FOREIGN KEY (master_id) REFERENCES masters (id) ON DELETE CASCADE
+            );
+        """)
+        conn.commit()
+        cur.close()
+        conn.close()
+        print("✅ 'appointments' jadvali yaratildi yoki mavjud!")
+    except Exception as e:
+        print(f"❌ Jadval yaratishda xato: {e}")
+
+
+
+def get_user_appointments(user_id):
+    try:
+        conn = connect_db()
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT a.date, a.time, a.service_name, m.name AS master_name
+            FROM appointments a
+            JOIN masters m ON a.master_id = m.id
+            WHERE a.user_id = %s
+            ORDER BY a.date, a.time;
+        """, (user_id,))
+        rows = cur.fetchall()
+        cur.close()
+        conn.close()
+
+        # Agar yozuvlar bo'lmasa
+        if not rows:
+            return False
+
+        # Ma'lumotlarni o'qish
+        result = []
+        for row in rows:
+            result.append({
+                "date": row[0].strftime("%d-%m-%Y"),
+                "time": row[1].strftime("%H:%M"),
+                "service": row[2],
+                "master_name": row[3]
+            })
+        return result
+
+    except Exception as e:
+        print(f"❌ Ma'lumotlarni olishda xato: {e}")
+        return None
+
+
+
+
+
 
 
 
