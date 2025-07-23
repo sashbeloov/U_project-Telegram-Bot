@@ -172,8 +172,10 @@ async def customer_menu_checked(message: Message, state: FSMContext):
             await message.answer(text=get_text(lang, 'message_text', 'select_change_info'), reply_markup=kb.change_info(lang))
             await state.set_state(statuslar.change_info_check)
 
-        elif message.text == get_text(lang, "buttons", ""):
-            pass
+        elif message.text == get_text(lang, "buttons", "service_type"):
+            await state.set_state(statuslar.tanlanga_hizmatlar)
+
+
         elif message.text == get_text(lang, "buttons", ""):
             pass
     except Exception as e:
@@ -181,7 +183,20 @@ async def customer_menu_checked(message: Message, state: FSMContext):
 
 
 
-# tilni o'zgartirishni oxirida to'g'irliman
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 @router.message(statuslar.change_info_check)
 async def change_info_check(message: Message, state: FSMContext):
     try:
