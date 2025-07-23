@@ -29,4 +29,10 @@ class statuslar(StatesGroup):
     update_phone_customer = State()
     update_customer_lang = State()
     tanlanga_hizmatlar = State()
+    service_type_user = State()
+    selected_service_type_user = State()
+    how_to_find = State()
+    service_type_user_master = State()
+    all_master_names = State()
+    get_master_name_and_rating_by_id = State()
 
