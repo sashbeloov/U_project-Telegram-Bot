@@ -57,7 +57,11 @@
           "not_found": "❌ Tugma topilmadi.",
           "sana": "Sanalar",
           "sana_simple": "Vaqtlardan birini tanlang",
-          "updated_customer_info": "Ma'lumotlaringiz muvvafaqiyatli yangilandi"
+          "updated_customer_info": "Ma'lumotlaringiz muvvafaqiyatli yangilandi",
+          "service_type_user": "Hizmat turini tanlang",
+          "how_to_find_master": "Ustani qaysi yo'l bilan tanlamoqchisiz tugmalardan birini tanlang:",
+          "no_masters": "Hali ustalar yoq",
+          "choose_master_by_name": "Ustalardan birini tanlang"
 
 
 
@@ -103,7 +107,10 @@
           "change_moljal_master": "\uD83C\uDFE2 Moljal",
           "change_lokatsiya_master": "\uD83D\uDCCD Lokatsiya",
           "change_working_tim_master": "\uD83D\uDD55 Ishlash soati",
-          "change_working_min_master": "⏳ Ishlash daqiqasi"
+          "change_working_min_master": "⏳ Ishlash daqiqasi",
+          "ism": "✍\uFE0F ism",
+          "rating_masters": "\uD83C\uDF1F rating",
+          "lok": "\uD83D\uDCCD lokatsiya"
 
 
         }
