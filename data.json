@@ -18,6 +18,7 @@
           "error_name": "Iltimos isimni to'g'ri kiriting\nMisol uchun - Ismoil",
           "confirmation_or_rejected": "Ma'lumotlaringizni tasdiqlaysizmi?\n",
           "phone": "Telefon raqamingiz: ",
+          "your_name": "Ismingiz: ",
           "confirmed_userinfo": "Ma'lumotlaringiz tasqilandi",
           "conf_workspace": "\uD83C\uDFD9 Manzil: ",
           "conf_moljal": "\uD83C\uDFEC Mo'ljal: ",
@@ -61,7 +62,13 @@
           "service_type_user": "Hizmat turini tanlang",
           "how_to_find_master": "Ustani qaysi yo'l bilan tanlamoqchisiz tugmalardan birini tanlang:",
           "no_masters": "Hali ustalar yoq",
-          "choose_master_by_name": "Ustalardan birini tanlang"
+          "choose_master_by_name": "Ustalardan birini tanlang",
+          "master_by_rating": "Rating bo'yicha ustalar",
+          "ismi": "Ismi: ",
+          "raqami": "Telefon raqami: ",
+          "ustxona_nomi": "Ustxona nomi: ",
+          "manzil_usta": "Manzil: ",
+          "moljal_usta": "moljal: "
 
 
 
@@ -73,7 +80,7 @@
           "customer":"\uD83D\uDE4B\u200D♂\uFE0F Mijoz",
           "location": "\uD83D\uDCCD Lokatsiyani yuborish",
           "barber": "\uD83D\uDC87 Sartarosh xona",
-          "beauty_salon": "\uD83D\uDC87\u200D♀\uFE0F Go'zallik saloni",
+          "beauty_salon": "\uD83D\uDC87\u200D♀\uFE0F Gozallik saloni",
           "shoes_master": "\uD83D\uDC5E Poyabzal ustasi",
           "watch_master": "\uD83D\uDD70 Soatsoz",
           "skip": "⏭\uFE0F O'tkazib yuborish",
@@ -110,7 +117,9 @@
           "change_working_min_master": "⏳ Ishlash daqiqasi",
           "ism": "✍\uFE0F ism",
           "rating_masters": "\uD83C\uDF1F rating",
-          "lok": "\uD83D\uDCCD lokatsiya"
+          "lok": "\uD83D\uDCCD lokatsiya",
+          "vaqt_olish": "Vaqt olish",
+          "baholash": "Baholash"
 
 
         }
