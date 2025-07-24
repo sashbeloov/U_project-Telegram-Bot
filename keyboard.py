@@ -4,6 +4,7 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from datetime import datetime, timedelta
 import json
+from db import *
 
 
 with open("data.json", "r", encoding="utf-8") as file:
@@ -124,6 +125,8 @@ def generate_date_keyboard():
     return kb.as_markup()
 
 
+
+
 def back(lang):
     keyboard = ReplyKeyboardBuilder()
     keyboard.add(
@@ -206,6 +209,13 @@ def show_master_info_to_customer(lang):
 
 
 
+def generate_hours_inline_keyboard(hours_list):
+    kb = InlineKeyboardBuilder()
+    hours = get_hours_from_db()
+    for i in generate_hours_inline_keyboard(hours):
+        kb.add(InlineKeyboardButton(text=f"{i}", callback_data=f"date_{i}"))
+    kb.adjust(3)
+    return kb.as_markup()
 
 
 
