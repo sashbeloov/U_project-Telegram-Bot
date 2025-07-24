@@ -282,10 +282,12 @@ async def all_master_names_selected(message: Message, state: FSMContext):
                 f"{get_text(lang, 'message_text', 'raqami')} {master_info["phone"]}\n"
                 f"{get_text(lang, 'message_text', 'ustxona_nomi')} {master_info["ustaxona_nomi"]}\n"
                 f"{get_text(lang, 'message_text', 'manzil_usta')} {master_info["address"]}\n"
-                f"{get_text(lang, 'message_text', 'moljal_usta')} {master_info["moljal"]}\n")
+                f"{get_text(lang, 'message_text', 'moljal_usta')} {master_info["moljal"]}\n"
+            )
             await bot.send_message(chat_id=user_id, text=msg_text, reply_markup=kb.show_master_info_to_customer(lang))
             await state.set_state(statuslar.show_master_info_to_customer)
             await state.update_data(master_to_show_name=message.text)
+            await state.update_data(master_tg_id=master_info["user_id"])
             await state.update_data(master_phone_for_rating=master_info["phone"])
 
     except Exception as e:
@@ -318,12 +320,67 @@ async def show_master_info_to_customer(message: Message, state: FSMContext):
 
         if message.text == get_text(lang, "buttons", "vaqt_olish"):
             await message.answer(text=get_text(lang, 'message_text', 'sana'), reply_markup=kb.generate_date_keyboard())
+            await state.set_state(statuslar.vaqt_tanlash)
 
 
     except Exception as e:
             print(f"Error:{e}")
 
 
+sana = []
+@dp.callback_query(F.data.startswith("date:"))
+async def select_date(callback: CallbackQuery, state: FSMContext):
+    data = await state.get_data()
+    lang = data['language']
+    selected_date = callback.data.split(":")[1]  # Masalan: 21.07.2025
+    sana.append(selected_date)
+    msg_text = (
+        f"{get_text(lang, 'message_text', 'vaqt_tanlash')}"
+    )
+    await callback.message.edit_text(text=msg_text, reply_markup=kb.generate_time_keyboard())
+
+
+
+@dp.callback_query(F.data.startswith("time:"))
+async def select_time(callback: CallbackQuery, state: FSMContext):
+    user_id = callback.from_user.id
+    data = await state.get_data()
+    lang = data['language']
+    selected_time = callback.data[5:]  # Masalan: 10:30
+    sana.append(selected_time)
+    msg_text = (
+        f"{get_text(lang, 'message_text', 'you_have_selected')} \n{sana[0]}\n{selected_time}\n"
+    )
+    await callback.message.edit_text(text=msg_text)
+    msg_text = (
+        f"{get_text(lang, 'message_text', 'confirmation_or_rejected')}\n"
+    )
+
+    await bot.send_message(chat_id=user_id, text=msg_text, reply_markup=kb.conf(lang))
+    await state.set_state(statuslar.confirm_or_reject_callback)
+
+
+@router.message(statuslar.confirm_or_reject_callback)
+async def confirm_or_reject_callback(message: Message, state: FSMContext):
+    try:
+        user_id = message.from_user.id
+        data = await state.get_data()
+        lang = data['language']
+        if message.text == get_text(lang, "buttons", "confirm"):
+            master_id = data['master_tg_id']
+            info = get_user_info(user_id)
+            insert_booking(master_id, info["name"], info["phone"], sana[0],sana[1])
+            await message.answer(text=get_text(lang, 'message_text', 'accepted_bron'))
+            await message.answer(text=get_text(lang, 'message_text', 'service_type_user'), reply_markup=kb.service_type_user(lang))
+            await state.set_state(statuslar.service_type_user)
+
+
+        if message.text == get_text(lang, "buttons", "rejected"):
+            await message.answer(text=get_text(lang, 'message_text', 'service_type_user'),reply_markup=kb.service_type_user(lang))
+            await state.set_state(statuslar.service_type_user)
+
+    except Exception as e:
+            print(f"Error:{e}")
 
 
 
@@ -793,9 +850,11 @@ async def rating_master(message: Message, state: FSMContext):
                 await message.answer(text=get_text(lang, 'message_text', 'no_rating'), reply_markup=kb.registered_master(lang))
 
         elif message.text == get_text(lang, "buttons", "mijozlar"):
+            print("keldi:",get_all_customer_bookings(user_id))
             if get_all_customer_bookings(user_id):
+                brons = get_all_customer_bookings(user_id)
                 msg_text = (
-                    f"{get_text(lang, 'message_text', 'all_brons')}{get_all_customer_bookings(user_id)}"
+                    f"{get_text(lang, 'message_text', 'all_brons')} {brons[0]}\n {brons[1]}\n {brons[2]}\n {brons[3]}\n"
                 )
                 await bot.send_message(chat_id=user_id, text=msg_text, reply_markup=kb.registered_master(lang))
             else:
