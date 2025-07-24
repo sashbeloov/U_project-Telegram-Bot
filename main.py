@@ -1,6 +1,6 @@
 import json
 from aiogram import Bot, Dispatcher, Router, F
-from aiogram.types import Message, ReplyKeyboardRemove
+from aiogram.types import Message, ReplyKeyboardRemove, CallbackQuery
 from aiogram.fsm.context import FSMContext
 from decouple import config
 from geopy import Nominatim
@@ -286,6 +286,7 @@ async def all_master_names_selected(message: Message, state: FSMContext):
             await bot.send_message(chat_id=user_id, text=msg_text, reply_markup=kb.show_master_info_to_customer(lang))
             await state.set_state(statuslar.show_master_info_to_customer)
             await state.update_data(master_to_show_name=message.text)
+            await state.update_data(master_phone_for_rating=master_info["phone"])
 
     except Exception as e:
             print(f"Error:{e}")
@@ -307,17 +308,41 @@ async def show_master_info_to_customer(message: Message, state: FSMContext):
             master_info = get_master_by_name(data['master_to_show_name'])
             lat_long = get_lat_long_by_address(master_info["address"])
             msg_text = (
-                    f"{get_text(lang, 'message_text', 'manzil_usta')} {master_info["address"]}\n")
-
-
+                    f"{get_text(lang, 'message_text', 'manzil_usta')} {master_info["address"]}\n"
+            )
             await bot.send_location(chat_id=user_id, latitude=lat_long["latitude"], longitude=lat_long["longitude"])
             await bot.send_message(chat_id=user_id, text=msg_text, reply_markup=kb.show_master_info_to_customer(lang))
+        if message.text == get_text(lang, "buttons", "baholash"):
+            await message.answer(text=get_text(lang, 'message_text', 'baho_berish'),reply_markup=ReplyKeyboardRemove())
+            await state.set_state(statuslar.baho_berish)
+
+        if message.text == get_text(lang, "buttons", "vaqt_olish"):
+            await message.answer(text=get_text(lang, 'message_text', 'sana'), reply_markup=kb.generate_date_keyboard())
+
 
     except Exception as e:
             print(f"Error:{e}")
 
 
 
+
+
+
+@router.message(statuslar.baho_berish)
+async def baho_berish(message: Message, state: FSMContext):
+    try:
+        user_id = message.from_user.id
+        data = await state.get_data()
+        lang = data['language']
+        text = message.text
+        if "." in text and text[0].isdigit():
+            master_phone_for_rating = data['master_phone_for_rating']
+            update_rating_by_phone(master_phone_for_rating, message.text)
+            await message.answer(text=get_text(lang, 'message_text', 'saved_rating'),reply_markup=kb.show_master_info_to_customer(lang))
+            await state.set_state(statuslar.show_master_info_to_customer)
+
+    except Exception as e:
+            print(f"Error:{e}")
 
 
 
