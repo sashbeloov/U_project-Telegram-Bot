@@ -114,15 +114,7 @@ def select_change_info(lang):
 
 
 
-def generate_date_keyboard():
-    kb = InlineKeyboardBuilder()
-    today = datetime.today()
-    for i in range(7):
-        date = today + timedelta(days=i)
-        formatted_date = date.strftime("%d.%m.%Y")  # Masalan: 21.07.2025
-        kb.add(InlineKeyboardButton(text=formatted_date, callback_data=f"date:{formatted_date}"))
-    kb.adjust(3)  # Har qatorda 3 ta tugma
-    return kb.as_markup()
+
 
 
 
@@ -207,15 +199,49 @@ def show_master_info_to_customer(lang):
 
 
 
-
-
-def generate_hours_inline_keyboard(hours_list):
+def generate_date_keyboard():
     kb = InlineKeyboardBuilder()
-    hours = get_hours_from_db()
-    for i in generate_hours_inline_keyboard(hours):
-        kb.add(InlineKeyboardButton(text=f"{i}", callback_data=f"date_{i}"))
-    kb.adjust(3)
+    today = datetime.today()
+    for i in range(7):
+        date = today + timedelta(days=i)
+        formatted_date = date.strftime("%d.%m.%Y")  # Masalan: 21.07.2025
+        kb.add(InlineKeyboardButton(text=formatted_date, callback_data=f"date:{formatted_date}"))
+    kb.adjust(3)  # Har qatorda 3 ta tugma
     return kb.as_markup()
+
+
+def generate_time_keyboard():
+    kb = InlineKeyboardBuilder()
+
+    # 1. Bazadan hours ni olish
+    conn = connect_db()
+    cur = conn.cursor()
+    cur.execute("SELECT hours FROM masters LIMIT 1")  # Hozircha 1ta ustadan
+    result = cur.fetchone()
+    cur.close()
+    conn.close()
+
+    if not result:
+        return None
+
+    hours = result[0]  # Masalan: "09:00-21:00"
+    start, end = hours.split("-")  # ["09:00", "21:00"]
+
+    # 2. String -> datetime
+    start_time = datetime.strptime(start, "%H:%M")
+    end_time = datetime.strptime(end, "%H:%M")
+
+    # 3. 30 daqiqalik slotlarga bo‘lish
+    delta = timedelta(minutes=30)
+    while start_time < end_time:
+        time_str = start_time.strftime("%H:%M")
+        kb.add(InlineKeyboardButton(text=time_str, callback_data=f"time:{time_str}"))
+        start_time += delta
+
+    kb.adjust(4)  # Har qatorda 4ta tugma
+    return kb.as_markup()
+
+
 
 
 
