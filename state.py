@@ -34,5 +34,7 @@ class statuslar(StatesGroup):
     how_to_find = State()
     service_type_user_master = State()
     all_master_names = State()
-    get_master_name_and_rating_by_id = State()
+    get_master_rating_by_id = State()
+    all_master_names_selected = State()
+    show_master_info_to_customer = State()
 
