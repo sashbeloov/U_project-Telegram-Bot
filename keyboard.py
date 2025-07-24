@@ -193,3 +193,25 @@ def get_master_name_and_rating_by_id(get_master_name_and_rating_by_id):
         keyboard.row(KeyboardButton(text=str(i)))
     keyboard.adjust(3)
     return keyboard.as_markup(resize_keyboard=True)
+
+
+def show_master_info_to_customer(lang):
+    keyboard = ReplyKeyboardBuilder()
+    keyboard.add(KeyboardButton(text=get_text(lang, 'buttons', 'lok')), KeyboardButton(text=get_text(lang, 'buttons', 'vaqt_olish')),
+                 KeyboardButton(text=get_text(lang, 'buttons', 'baholash')), KeyboardButton(text=get_text(lang, 'buttons', 'back')))
+    keyboard.adjust(3,1)
+    return keyboard.as_markup(resize_keyboard=True)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
