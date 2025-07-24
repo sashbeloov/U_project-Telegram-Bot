@@ -130,6 +130,43 @@ def create_table():
         print(f"Jadval yaratishda xato: {e}")
 
 
+def update_rating_by_phone(phone, new_rating):
+    try:
+        conn = connect_db()
+        cur = conn.cursor()
+
+        cur.execute("""
+            UPDATE masters
+            SET rating = %s
+            WHERE phone = %s;
+        """, (new_rating, phone))
+
+        if cur.rowcount == 0:
+            print(f"❌ Telefon raqam topilmadi: {phone}")
+        else:
+            print(f"✅ {cur.rowcount} ta yozuv yangilandi.")
+
+        conn.commit()
+        cur.close()
+        conn.close()
+    except Exception as e:
+        print(f"⚠️ Rating yangilashda xato: {e}")
+
+
+
+def get_hours_from_db():
+    try:
+        conn = connect_db()
+        cur = conn.cursor()
+        cur.execute("SELECT DISTINCT hours FROM masters WHERE hours IS NOT NULL;")
+        results = cur.fetchall()
+        cur.close()
+        conn.close()
+
+        return [row[0] for row in results]  # Faqat vaqt stringlarini olish
+    except Exception as e:
+        print(f"⛔️ Bazadan vaqtlarni olishda xatolik: {e}")
+        return []
 
 
 def insert_master(user_id, name, phone, ustaxona_nomi, moljal, address, hours, min_time, language, service_type, latitude, longitude, rating=0.0):
