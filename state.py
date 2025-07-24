@@ -1,3 +1,4 @@
+
 from aiogram.fsm.state import State, StatesGroup
 
 
@@ -38,3 +39,5 @@ class statuslar(StatesGroup):
     all_master_names_selected = State()
     show_master_info_to_customer = State()
     baho_berish = State()
+    vaqt_tanlash = State()
+    confirm_or_reject_callback = State()
