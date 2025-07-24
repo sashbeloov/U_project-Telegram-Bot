@@ -37,4 +37,4 @@ class statuslar(StatesGroup):
     get_master_rating_by_id = State()
     all_master_names_selected = State()
     show_master_info_to_customer = State()
-
+    baho_berish = State()
