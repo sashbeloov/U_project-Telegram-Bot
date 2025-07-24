@@ -98,7 +98,6 @@ def update_user_field(tg_id, field_name, new_value):
         return False
 
 
-
 def create_table():
     try:
         conn = connect_db()
@@ -118,6 +117,8 @@ def create_table():
             service_type VARCHAR(50),
             status BOOLEAN DEFAULT FALSE,
             rating NUMERIC(2,1) DEFAULT 0,
+            latitude DOUBLE PRECISION,
+            longitude DOUBLE PRECISION,
             created_at TIMESTAMP DEFAULT NOW()
         );
         """)
@@ -130,13 +131,14 @@ def create_table():
 
 
 
-def insert_master(user_id, name, phone, ustaxona_nomi, moljal, address, hours, min_time, language, service_type, rating=0.0):
+
+def insert_master(user_id, name, phone, ustaxona_nomi, moljal, address, hours, min_time, language, service_type, latitude, longitude, rating=0.0):
     try:
         conn = connect_db()
         cur = conn.cursor()
         query = """
-        INSERT INTO masters (user_id, name, phone, ustaxona_nomi, moljal, address, hours, min, language, service_type, rating, status)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, FALSE)
+        INSERT INTO masters (user_id, name, phone, ustaxona_nomi, moljal, address, hours, min, language, service_type, latitude, longitude, rating, status)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, FALSE)
         ON CONFLICT (user_id) DO UPDATE SET
             name = EXCLUDED.name,
             phone = EXCLUDED.phone,
@@ -147,10 +149,12 @@ def insert_master(user_id, name, phone, ustaxona_nomi, moljal, address, hours, m
             min = EXCLUDED.min,
             language = EXCLUDED.language,
             service_type = EXCLUDED.service_type,
+            latitude = EXCLUDED.latitude,
+            longitude = EXCLUDED.longitude,
             rating = EXCLUDED.rating,
             status = FALSE;
         """
-        cur.execute(query, (user_id, name, phone, ustaxona_nomi, moljal, address, hours, min_time, language, service_type, rating))
+        cur.execute(query, (user_id, name, phone, ustaxona_nomi, moljal, address, hours, min_time, language, service_type, latitude, longitude, rating))
         conn.commit()
         cur.close()
         conn.close()
@@ -175,12 +179,41 @@ def get_master_name_and_rating_by_id(user_id):
             name, rating = row
             return f"{name} {rating}/10"
         else:
-            return None
+            return False
     except Exception as e:
         print(f"Error: {e}")
         return None
 
 
+def get_master_by_name(name):
+    try:
+        conn = connect_db()
+        cur = conn.cursor()
+
+        # SELECT faqat kerakli ustunlar
+        cur.execute("""
+            SELECT name, phone, ustaxona_nomi, address, moljal
+            FROM masters
+            WHERE name = %s;
+        """, (name,))
+
+        result = cur.fetchone()
+        cur.close()
+        conn.close()
+
+        if result:
+            return {
+                "name": result[0],
+                "phone": result[1],
+                "ustaxona_nomi": result[2],
+                "address": result[3],
+                "moljal": result[4]
+            }
+        else:
+            return None
+    except Exception as e:
+        print(f"Ma'lumotni olishda xato: {e}")
+        return None
 
 
 def get_masters_names_by_service_type(service_type):
@@ -202,6 +235,34 @@ def get_masters_names_by_service_type(service_type):
     except Exception as e:
         print(f"Error: {e}")
         return []
+
+
+def get_lat_long_by_address(address):
+    try:
+        conn = connect_db()
+        cur = conn.cursor()
+
+        query = """
+        SELECT latitude, longitude
+        FROM masters
+        WHERE address = %s;
+        """
+
+        cur.execute(query, (address,))
+        result = cur.fetchone()
+
+        cur.close()
+        conn.close()
+
+        if result:
+            return {"latitude": result[0], "longitude": result[1]}
+        else:
+            return False
+    except Exception as e:
+        print(f"Xatolik: {e}")
+        return None
+
+
 
 
 def update_master_info(user_id, **kwargs):
