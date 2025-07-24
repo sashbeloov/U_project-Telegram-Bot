@@ -36,6 +36,35 @@ def create_table_users():
         conn.close()
 
 
+
+def get_user_info(user_id):
+    try:
+        conn = connect_db()
+        cur = conn.cursor()
+
+        cur.execute("""
+            SELECT name, phone
+            FROM users
+            WHERE user_id = %s;
+        """, (user_id,))
+
+        result = cur.fetchone()
+        cur.close()
+        conn.close()
+
+        if result:
+            return {
+                "name": result[0],
+                "phone": result[1]
+            }
+        else:
+            return False
+    except Exception as e:
+        print(f"Ma'lumotni olishda xato: {e}")
+        return None
+
+
+
 def save_user(user_id, name, phone, language):
     conn = connect_db()
     if conn:
@@ -227,9 +256,9 @@ def get_master_by_name(name):
         conn = connect_db()
         cur = conn.cursor()
 
-        # SELECT faqat kerakli ustunlar
+        # SELECT ga user_id ni qo‘shamiz
         cur.execute("""
-            SELECT name, phone, ustaxona_nomi, address, moljal
+            SELECT user_id, name, phone, ustaxona_nomi, address, moljal
             FROM masters
             WHERE name = %s;
         """, (name,))
@@ -240,17 +269,19 @@ def get_master_by_name(name):
 
         if result:
             return {
-                "name": result[0],
-                "phone": result[1],
-                "ustaxona_nomi": result[2],
-                "address": result[3],
-                "moljal": result[4]
+                "user_id": result[0],
+                "name": result[1],
+                "phone": result[2],
+                "ustaxona_nomi": result[3],
+                "address": result[4],
+                "moljal": result[5]
             }
         else:
             return None
     except Exception as e:
         print(f"Ma'lumotni olishda xato: {e}")
         return None
+
 
 
 def get_masters_names_by_service_type(service_type):
@@ -567,7 +598,6 @@ def get_user_appointments(user_id):
     except Exception as e:
         print(f"❌ Ma'lumotlarni olishda xato: {e}")
         return None
-
 
 
 
